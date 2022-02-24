@@ -1,0 +1,14 @@
+learn-dbt:
+  outputs:
+    dev:
+      account: SSIT
+      client_session_keep_alive: false
+      database: TEST_DB
+      password: Cisco_sf9
+      role: PUBLIC
+      schema: dbt
+      threads: 1
+      type: snowflake
+      user: cisco_sf
+      warehouse: demo_wh
+  target: dev

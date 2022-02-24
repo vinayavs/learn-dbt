@@ -1,0 +1,47 @@
+import datetime
+from prefect import Flow
+from prefect.tasks.dbt import DbtShellTask
+from prefect.schedules import IntervalSchedule
+import boto3
+import json
+
+client = boto3.client('secretsmanager')
+
+response = client.get_secret_value(
+    SecretId=f'arn:aws:secretsmanager:ap-south-1:434844919346:secret:dev/dbt/demo-rlXuoe'
+)
+
+secretDict = json.loads(response['SecretString'])
+
+def build_flow(schedule=None):
+    with Flow(name="learn-dbt", schedule=schedule) as flow:
+        task = DbtShellTask(
+            profile_name='learn-dbt',
+            environment='dev',
+            dbt_kwargs={
+        'type': 'snowflake',
+        'account': 'SSIT',
+
+        # User/password auth
+        'user': secretDict['USER_SNOWFLAKE'],
+        'password': secretDict['PASSWORD_SNOWFLAKE'],
+        'role': 'PUBLIC',
+        'database': 'TEST_DB',
+        'warehouse': 'demo_wh',
+        'schema': 'dbt',
+        'threads': 1,
+        'client_session_keep_alive': False
+            },
+            overwrite_profiles=True,
+            profiles_dir=r"/root/.dbt/"
+        )(command='dbt run')
+    return flow
+
+schedule = IntervalSchedule(
+    start_date=datetime.datetime.now() + datetime.timedelta(seconds=5),
+    interval=datetime.timedelta(seconds=10)
+)
+
+flow = build_flow()
+# flow.visualize()
+flow.run()

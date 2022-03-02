@@ -1,0 +1,26 @@
+{
+    "family": "workflow-task",
+    "networkMode": "awsvpc",
+    "executionRoleArn": "arn:aws:iam::434844919346:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {"name": "workflow-container",
+            "image": "434844919346.dkr.ecr.ap-south-1.amazonaws.com/dbt-demo:latest",
+            "linuxParameters": {
+                "initProcessEnabled": true
+            },            
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                    "options": {
+                       "awslogs-group": "/ecs/dbt-task",
+                       "awslogs-region": "ap-south-1",
+                       "awslogs-stream-prefix": "container-stdout"
+                    }
+            }
+        }
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
